@@ -6,8 +6,8 @@ import {Ownable} from "../lib/openzeppelin-contracts/contracts/access/Ownable.so
 
 contract MyToken is ERC20, Ownable {
     constructor() ERC20("AnkitCoin", "ANK") Ownable(msg.sender) {
-        _mint(msg.sender, 1_000_000 * 10 ** decimals());
     }
+    // here msg.sender is the one who deploys the contract
 
     function mint(address to, uint256 amount) external onlyOwner {
         _mint(to, amount);
@@ -16,4 +16,5 @@ contract MyToken is ERC20, Ownable {
     function burn(uint256 amount) external {
         _burn(msg.sender, amount);
     }
+    // this func allow any user to burn their token
 }
