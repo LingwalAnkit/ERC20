@@ -16,13 +16,13 @@ contract MyToken is ERC20, Ownable {
     }
 
     function getbalance(address account) external view returns (uint256) {
-        return balanceOf(account);
+        return balanceOf(account); // for token balance 
     }
 
     function test() external payable {}
 
     function getEthBalance() external view returns (uint256) {
-        return address(this).balance;
+        return address(this).balance; // for eth balance
     }
 
     receive() external payable {}
