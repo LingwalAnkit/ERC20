@@ -2,12 +2,13 @@
 pragma solidity ^0.8.13;
 
 import {Test, console} from "forge-std/Test.sol";
-import {MyToken} from "../src/token.sol";
+import {MyToken} from "../src/token.sol"; 
 
 contract TokenTest is Test {
     MyToken public mytoken;
     address owner;
     address user;
+
     event Transfer(address indexed from, address indexed to, uint256 value);
 
     function setUp() public {
@@ -36,11 +37,7 @@ contract TokenTest is Test {
         mytoken.transferFrom(owner, user, 30);
 
         assertEq(mytoken.balanceOf(user), 30, "User should have 30 tokens");
-        assertEq(
-            mytoken.allowance(owner, user),
-            20,
-            "Remaining allowance should be 20"
-        );
+        assertEq(mytoken.allowance(owner, user), 20, "Remaining allowance should be 20");
         assertEq(mytoken.balanceOf(owner), 70, "Owner should have 70 tokens");
     }
 
@@ -49,27 +46,30 @@ contract TokenTest is Test {
         mytoken.approve(user, 20);
 
         vm.prank(user);
-        vm.expectRevert(); // or pass the selector / reason string
+        vm.expectRevert(); // You can also specify error selector
         mytoken.transferFrom(owner, user, 100);
     }
 
     function test_transfer_reverts() public {
         mytoken.mint(owner, 100);
-        vm.expectRevert();
+        vm.expectRevert("ERC20: transfer amount exceeds balance");
         mytoken.transfer(user, 200);
     }
 
     function testTranferEmits() public {
-        mytoken.mint(owner , 100);
-        vm.expectEmit(true, true, false, true); // match from to and value the false means we don't care about the 3rd indexed field
+        mytoken.mint(owner, 100);
+        vm.expectEmit(true, true, false, true);
         emit Transfer(owner, user, 50);
         mytoken.transfer(user, 50);
     }
 
-    function testDeal() public {
-        address user2 = address(0x1234);
-        vm.deal(user2, 10 ether);
-
-        assertEq(user2.balance, 10 ether);
+    function testHoax() public {
+        hoax(user, 10 ether); // user gets 10 ether AND becomes msg.sender for next tx
+        // vm.deal + vm.startPrank
+        mytoken.test{value: 1 ether}(); // Call payable test() with 1 ether
+        // Check remaining balance of user
+        assertEq(address(user).balance, 9 ether);
+        // Check contract received ether
+        assertEq(mytoken.getEthBalance(), 1 ether);
     }
 }
